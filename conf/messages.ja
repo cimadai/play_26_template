@@ -1,0 +1,5 @@
+title.application=アプリケーション
+cannot.parse.json=JSONのパースに失敗しました。({0})
+not.found.such.user=指定されたユーザー ({0}) が見つかりませんでした。
+invalid.json=不正なJSONフォーマット
+

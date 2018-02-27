@@ -1,0 +1,11 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Home page
+GET        /                    framework.controllers.AppPage.index
+GET        /api/users           framework.controllers.AppPage.getUsers
+
+# Map static resources from the /public folder to the /framework/assets URL path
+GET        /assets/*file        controllers.Assets.versioned(path="/public", file)
+

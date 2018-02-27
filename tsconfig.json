@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    "noImplicitAny": false,
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "moduleResolution": "classic",
+    "sourceMap": true,
+    "outDir": ".typescript-out",
+    "allowSyntheticDefaultImports": true,
+    "lib": [
+      "es2015",
+      "es2015.iterable",
+      "dom"
+    ],
+    "sourceRoot": "app/assets/js/"
+  },
+  "files": [
+    "app/framework/assets/js/application.ts"
+  ]
+}

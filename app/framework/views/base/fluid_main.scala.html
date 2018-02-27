@@ -1,0 +1,7 @@
+@(flash: Flash, title: String, scripts: Html = Html(""))(content: Html)(implicit m: Messages, request: RequestHeader, env: play.api.Environment, assets: AssetsFinder)
+
+@framework.views.html.base.main(flash, title, scripts) {
+    <div class="container-fluid">
+    @content
+    </div>
+}
