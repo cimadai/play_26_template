@@ -7,6 +7,11 @@ val PROJECT_SCALA_VERSION = "2.11.11"
 val SLICK_VERSION = "3.0.2"
 val webpackCommand = "webpack"
 
+import play.sbt.PlayImport.PlayKeys.playRunHooks
+def runWebpack(file: File): Int =
+  Process(webpackCommand, file, "BUILD_ENV" -> "production").run().exitValue()
+lazy val webpack = taskKey[Unit]("Run webpack when packaging the application")
+
 lazy val libraries = Seq(
   "com.typesafe.play" %% "play-json" % "2.6.7",
   "com.h2database" % "h2" % "1.4.196",
@@ -27,21 +32,19 @@ lazy val libraries = Seq(
   "org.scalatest" %% "scalatest" % "3.0.4" % "test"
 )
 
-scalaVersion := PROJECT_SCALA_VERSION
-
-import play.sbt.PlayImport.PlayKeys.playRunHooks
-lazy val webpack = taskKey[Unit]("Run webpack when packaging the application")
-def runWebpack(file: File): Int = {
-  Process(webpackCommand, file, "BUILD_ENV" -> "production").run().exitValue()
-}
-webpack := {
-  if(runWebpack(baseDirectory.value) != 0) throw new Exception("Something goes wrong when running webpack.")
-}
-dist := (dist dependsOn webpack).value
-stage := (stage dependsOn webpack).value
-
-resolvers += Resolver.sonatypeRepo("snapshots")
-lazy val root = (project in file("."))
+lazy val web = (project in file("./web"))
+  .settings(
+    scalaVersion := PROJECT_SCALA_VERSION,
+    dist := (dist dependsOn webpack).value,
+    stage := (stage dependsOn webpack).value,
+    resolvers += Resolver.sonatypeRepo("snapshots"),
+    updateOptions := updateOptions.value.withCachedResolution(true),
+    webpack := {
+      if(runWebpack(baseDirectory.value) != 0) {
+        throw new Exception("Something goes wrong when running webpack.")
+      }
+    }
+  )
   .enablePlugins(PlayScala)
   .settings(
     scalacOptions ++= Seq(
@@ -77,7 +80,3 @@ lazy val root = (project in file("."))
     buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
     buildInfoPackage := "helpers"
   )
-
-updateOptions := updateOptions.value.withCachedResolution(true)
-
-import scala.sys.process.Process
