@@ -41,7 +41,7 @@ class AppPageIndexPagePresenter @Inject()
   }
 
   def request2User(request: OutsideHttpRequest): Option[domain.User] = {
-    Some(domain.User("test"))
+    Some(domain.User("example", 30))
   }
 
 }
