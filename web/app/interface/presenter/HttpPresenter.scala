@@ -2,9 +2,9 @@ package interface.presenter
 
 import com.google.inject.Inject
 import controllers.AssetsFinder
-import interface.Types.{OutsideHttpRequest, OutsideHttpResponse}
+import domain.TeamID
 import play.api.i18n.I18nSupport
-import play.api.mvc.InjectedController
+import play.api.mvc.{InjectedController, RequestHeader, Result}
 
 /**
   * Interface層でのエラーをHTTP Clientに返却するプレゼンター
@@ -17,7 +17,7 @@ class InterfaceErrorPagePresenter @Inject()
 ) extends InjectedController
   with I18nJsonFormatImplicitsSupport {
 
-  def present(err: interface.InterfaceError)(implicit request: OutsideHttpRequest): OutsideHttpResponse = {
+  def present(err: interface.InterfaceError)(implicit request: RequestHeader): Result = {
     val messageGen = request2messageGen(request)
     BadRequest(messageGen.toMessage(err))
   }
@@ -33,15 +33,12 @@ class AppPageIndexPagePresenter @Inject()
   implicit val assetsFinder: AssetsFinder
 ) extends InjectedController with I18nSupport {
 
-  def present(done: domain.responses.Done)(implicit request: OutsideHttpRequest): OutsideHttpResponse = {
-    request2User(request).map(user => {
-      // use user
-      Ok(framework.views.html.Application.index(request.flash))
-    }).getOrElse(NotFound(""))
+  def present(teamId: TeamID, done: domain.responses.Done)(implicit request: RequestHeader): Result = {
+    Ok(framework.views.html.Application.index())
   }
-
-  def request2User(request: OutsideHttpRequest): Option[domain.User] = {
-    Some(domain.User("example", 30))
-  }
+//
+//  def request2User(teamId: TeamID): Option[domain.User] = {
+//    Some(domain.User("aaa", "example", 30))
+//  }
 
 }

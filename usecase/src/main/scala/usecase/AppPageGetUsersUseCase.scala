@@ -1,18 +1,24 @@
 package usecase
 
 import com.google.inject.Inject
+import domain.TeamID
+import domain.repositories.ITeamRepository
+import domain.requests.GetUsersRequest
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class AppPageGetUsersUseCase @Inject()
 (
   implicit val ec: ExecutionContext,
-  usersRepository: domain.repositories.IUserRepository
+  teamRepository: ITeamRepository
 ) {
 
-  def getUsers(req: domain.requests.GetUsersRequest): Future[domain.responses.GetUsersResponse] = {
+  def getUsers(teamId: TeamID, req: GetUsersRequest)
+  : Future[domain.responses.GetUsersResponse] = {
 
-    usersRepository.listUsers(req.pageNum, req.pageSize)
+    teamRepository
+      .getUserRepository(teamId)
+      .listUsers(req.pageNum, req.pageSize)
       .map(domain.responses.GetUsersResponse)
 
   }

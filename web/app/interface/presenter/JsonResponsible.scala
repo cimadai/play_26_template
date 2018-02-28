@@ -1,9 +1,8 @@
 package interface.presenter
 
-import interface.Types.OutsideHttpRequest
 import org.slf4j.LoggerFactory
 import play.api.libs.json.{JsNumber, JsObject, Json}
-import play.api.mvc.{Result, Results}
+import play.api.mvc.{RequestHeader, Result, Results}
 
 object JsonResponsible {
 
@@ -33,7 +32,7 @@ trait JsonResponsible extends Results {
 
   private val accessLogger = LoggerFactory.getLogger("access")
 
-  protected def renderJsonOk()(implicit request: OutsideHttpRequest): Result = {
+  protected def renderJsonOk()(implicit request: RequestHeader): Result = {
     accessLogger.debug(
       s"message:Ajax OK\t" +
         s"status:[200]\t" +
@@ -44,11 +43,11 @@ trait JsonResponsible extends Results {
     Ok(Json.obj("ret_code" -> 0))
   }
 
-  protected def renderJsonOk(obj: domain.responses.IDomainSuccess)(implicit request: OutsideHttpRequest, jsonModelFormatImplicits: JsonModelWriteImplicits): Result = {
+  protected def renderJsonOk(obj: domain.responses.IDomainSuccess)(implicit request: RequestHeader, jsonModelFormatImplicits: JsonModelWriteImplicits): Result = {
     Ok(toJsObject(obj))
   }
 
-  protected def renderJsonOk(jsObject: JsObject)(implicit request: OutsideHttpRequest): Result = {
+  protected def renderJsonOk(jsObject: JsObject)(implicit request: RequestHeader): Result = {
     accessLogger.debug(
       s"message:Ajax OK\t" +
         s"status:[200]\t" +
@@ -59,7 +58,7 @@ trait JsonResponsible extends Results {
     Ok(jsObject + ("ret_code" -> JsNumber(0)))
   }
 
-  protected def renderJsonError(obj: domain.errors.DomainError)(implicit request: OutsideHttpRequest, jsonModelFormatImplicits: JsonModelWriteImplicits): Result = {
+  protected def renderJsonError(obj: domain.errors.DomainError)(implicit request: RequestHeader, jsonModelFormatImplicits: JsonModelWriteImplicits): Result = {
     renderJsonError(obj.status, toJsObject(obj))
   }
 
@@ -72,7 +71,7 @@ trait JsonResponsible extends Results {
     }
   }
 
-  private def renderJsonError(status: Int, jsObject: JsObject)(implicit request: OutsideHttpRequest): Result = {
+  private def renderJsonError(status: Int, jsObject: JsObject)(implicit request: RequestHeader): Result = {
     accessLogger.error(
       s"message:Ajax NG\t" +
         s"status:[$status]\t" +
@@ -84,7 +83,7 @@ trait JsonResponsible extends Results {
     new Status(status)(jsObject + ("ret_code" -> JsNumber(1)))
   }
 
-  protected def renderJsonError(obj: domain.errors.DomainError, jsObject: JsObject)(implicit request: OutsideHttpRequest, jsonModelFormatImplicits: JsonModelWriteImplicits): Result = {
+  protected def renderJsonError(obj: domain.errors.DomainError, jsObject: JsObject)(implicit request: RequestHeader, jsonModelFormatImplicits: JsonModelWriteImplicits): Result = {
     renderJsonError(obj.status, jsObject ++ toJsObject(obj))
   }
 }

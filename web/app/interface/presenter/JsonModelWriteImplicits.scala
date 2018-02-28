@@ -1,10 +1,10 @@
 package interface.presenter
 
 import domain.errors.DomainError
-import interface.Types.OutsideHttpRequest
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
+import play.api.mvc.{Request, RequestHeader}
 
 class ErrorMessageGenerator(messages: Messages) {
   def toMessage(error: domain.errors.DomainError): String = error match {
@@ -24,10 +24,10 @@ class ErrorMessageGenerator(messages: Messages) {
 trait I18nJsonFormatImplicitsSupport extends I18nSupport {
   val implicitFactory: JsonModelWriteImplicitsFactory
 
-  implicit def request2messageGen(implicit request: OutsideHttpRequest): ErrorMessageGenerator =
+  implicit def request2messageGen(implicit request: RequestHeader): ErrorMessageGenerator =
     new ErrorMessageGenerator(request2Messages(request))
 
-  implicit def request2jsonImplicits(implicit request: OutsideHttpRequest): JsonModelWriteImplicits =
+  implicit def request2jsonImplicits(implicit request: RequestHeader): JsonModelWriteImplicits =
     implicitFactory.generateWrites(request2Messages(request))
 }
 
