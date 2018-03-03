@@ -133,6 +133,6 @@ hs_err_pid*
 
 ### My template
 .typescript-out/
-app/framework/assets/js/**/*.js
-app/framework/assets/js/**/*.js.map
+web/app/framework/assets/js/**/*.js
+web/app/framework/assets/js/**/*.js.map
 

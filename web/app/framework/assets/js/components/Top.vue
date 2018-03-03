@@ -32,21 +32,12 @@
 </template>
 
 <script lang="ts" type="text/tsx">
-    import AxiosFactory from 'axios';
     import Vue from "vue";
-    import Notification from "vue-notification";
-    import velocity from 'velocity-animate';
 
     import {IApiError, ICreateUserResponse, IDeleteUserResponse, IGetUsersResponse} from "../models";
 
+    import AxiosFactory from 'axios';
     const axios = AxiosFactory.create({headers: {"X-Requested-With": "XMLHttpRequest"}});
-    Vue.use(Notification, {velocity});
-
-    declare module 'vue/types/vue' {
-        export interface Vue {
-            $notify: Notification;
-        }
-    }
 
     export default Vue.extend({
         data: () => {
@@ -61,6 +52,14 @@
         },
         methods: {
             addUser: function() {
+                if (!this.userName || this.userName.length == 0) {
+                    this.error({
+                        title: "Error",
+                        text: "userId must be set."
+                    });
+                    return;
+                }
+
                 axios
                     .post("/api/users", {
                         user: {
@@ -75,7 +74,10 @@
                     })
                     .catch(e => {
                         const apiError = e.response.data as IApiError;
-                        this.error(apiError.caption);
+                        this.error({
+                            title: "title1",
+                            text: apiError.caption
+                        });
                     })
             },
             getUsers: function() {
@@ -87,16 +89,21 @@
                     })
                     .catch(e => {
                         const apiError = e.response.data as IApiError;
-                        this.$notify({
-                            type: "error",
-                            title: "Error",
+                        this.error({
+                            title: "title2",
                             text: apiError.caption
                         });
                     });
             },
             deleteUser: function(userId: string) {
-                if (userId.length == 0) {
+                if (!userId || userId.length == 0) {
+                    this.error({
+                        title: "Error",
+                        text: "userId must be set."
+                    });
+                    return;
                 }
+
                 axios
                     .delete(`/api/users/${userId}`)
                     .then(response => response.data as IDeleteUserResponse)
@@ -105,9 +112,8 @@
                     })
                     .catch(e => {
                         const apiError = e.response.data as IApiError;
-                        this.$notify({
-                            type: "error",
-                            title: "Error",
+                        this.error({
+                            title: "title3",
                             text: apiError.caption
                         });
                     });

@@ -7,9 +7,11 @@
     "moduleResolution": "node",
     "sourceMap": true,
     "outDir": ".typescript-out",
-    "allowSyntheticDefaultImports": true,
     "lib": [ "es2015", "es2015.iterable", "dom" ],
     "sourceRoot": "app/assets/js/",
+    // import Vue from "vue"するため
+    "allowSyntheticDefaultImports": true,
+    // Thisを推論させるため
     "noImplicitThis": true,
     "alwaysStrict": true,
     "noImplicitAny": false,
@@ -20,5 +22,11 @@
   },
   "files": [
     "app/framework/assets/js/application.ts"
+  ],
+  "include": [
+    "app/framework/assets/js/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
   ]
 }
