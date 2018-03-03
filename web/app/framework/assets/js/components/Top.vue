@@ -6,20 +6,112 @@
             </div>
         </div>
         <div class="container">
-            <input type="text" class="form-control" v-model="greeting"/>
+            <form class="form-horizontal">
+                <div class="form-group">
+                    <div class="col-md-4">
+                        <input type="text" class="form-control" v-model="userName"/>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-default" v-on:click.prevent="addUser">Add User</button>
+                    </div>
+                </div>
+            </form>
+            <div class="row">
+                <div class="col-md-4">
+                    <ul class="list-group">
+                        <li class="list-group-item clearfix" v-for="user in users">
+                            {{ user.name }} - {{ user.age }}
+                            <div v-on:click="deleteUser(user.id)" class="btn btn-danger btn-xs pull-right"><i class="fa fa-trash"></i> Remove</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
-        <div>
-            <a href="/api/users">API: Users</a>
-        </div>
+        <notifications :speed="400" position="top right" />
     </div>
 </template>
 
-<script type="text/tsx">
-    export default {
+<script lang="ts" type="text/tsx">
+    import AxiosFactory from 'axios';
+    import Vue from "vue";
+    import Notification from "vue-notification";
+    import velocity from 'velocity-animate';
+
+    import {IApiError, ICreateUserResponse, IDeleteUserResponse, IGetUsersResponse} from "../models";
+
+    const axios = AxiosFactory.create({headers: {"X-Requested-With": "XMLHttpRequest"}});
+    Vue.use(Notification, {velocity});
+
+    declare module 'vue/types/vue' {
+        export interface Vue {
+            $notify: Notification;
+        }
+    }
+
+    export default Vue.extend({
         data: () => {
             return {
-                greeting: "Hello World! Please edit me."
+                greeting: "Example app",
+                userName: "",
+                users: []
+            }
+        },
+        mounted: function () {
+            this.getUsers();
+        },
+        methods: {
+            addUser: function() {
+                axios
+                    .post("/api/users", {
+                        user: {
+                            id: this.userName,
+                            name: this.userName,
+                            age: 100,
+                        }
+                    })
+                    .then(response => response.data as ICreateUserResponse)
+                    .then(() => {
+                        this.getUsers();
+                    })
+                    .catch(e => {
+                        const apiError = e.response.data as IApiError;
+                        this.error(apiError.caption);
+                    })
+            },
+            getUsers: function() {
+                axios
+                    .get("/api/users")
+                    .then(response => response.data as IGetUsersResponse)
+                    .then(data => {
+                        this.users = data.users;
+                    })
+                    .catch(e => {
+                        const apiError = e.response.data as IApiError;
+                        this.$notify({
+                            type: "error",
+                            title: "Error",
+                            text: apiError.caption
+                        });
+                    });
+            },
+            deleteUser: function(userId: string) {
+                if (userId.length == 0) {
+                }
+                axios
+                    .delete(`/api/users/${userId}`)
+                    .then(response => response.data as IDeleteUserResponse)
+                    .then(() => {
+                        this.getUsers();
+                    })
+                    .catch(e => {
+                        const apiError = e.response.data as IApiError;
+                        this.$notify({
+                            type: "error",
+                            title: "Error",
+                            text: apiError.caption
+                        });
+                    });
             }
         }
-    };
+    })
 </script>

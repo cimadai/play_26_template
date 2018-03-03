@@ -55,10 +55,7 @@ body {
   }
 }
 
-#top_vue {
-  .container {
-    input {
-      width: 400px;
-    }
-  }
+.notifications {
+  top: 10px !important;
+  right: 10px !important;
 }

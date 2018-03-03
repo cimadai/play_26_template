@@ -3,23 +3,23 @@ package usecase
 import com.google.inject.Inject
 import domain.TeamID
 import domain.repositories.ITeamRepository
-import domain.requests.GetUsersRequest
+import domain.requests.DeleteUserRequest
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class AppPageGetUsersUseCase @Inject()
+class DeleteUser @Inject()
 (
   implicit val ec: ExecutionContext,
   teamRepository: ITeamRepository
 ) {
 
-  def getUsers(teamId: TeamID, req: GetUsersRequest)
-  : Future[domain.responses.GetUsersResponse] = {
+  def deleteUser(teamId: TeamID, req: DeleteUserRequest)
+  : Future[domain.responses.DeleteUserResponse] = {
 
     teamRepository
       .getUserRepository(teamId)
-      .listUsers(req.pageNum, req.pageSize)
-      .map(domain.responses.GetUsersResponse)
+      .deleteUser(req)
+      .map(domain.responses.DeleteUserResponse)
 
   }
 }

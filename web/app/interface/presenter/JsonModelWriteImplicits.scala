@@ -1,23 +1,31 @@
 package interface.presenter
 
-import domain.errors.DomainError
+import domain._
+import domain.errors.{CannotCreateUserBecauseSameIdAlreadyExists, NotFoundSuchUser}
+import domain.responses.{CreateUserResponse, DeleteUserResponse, GetUserResponse, GetUsersResponse}
+import interface.{HttpErrorResponse, InterfaceError, InvalidJsonFormat, JsonParseError}
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
-import play.api.mvc.{Request, RequestHeader}
+import play.api.mvc.RequestHeader
 
 class ErrorMessageGenerator(messages: Messages) {
-  def toMessage(error: domain.errors.DomainError): String = error match {
-    case e: interface.JsonParseError =>
-      val errorMessage = e.errors.map(e =>
+  def toHttpErrorResponse(error: InterfaceError): HttpErrorResponse = error match {
+    case InvalidJsonFormat() =>
+      HttpErrorResponse(400, error.category, error.code, messages("invalid.json"))
+    case JsonParseError(errors) =>
+      val errorMessage = errors.map(e =>
         s"${e._1.toString()} -> ${e._2.map(ve => messages(ve.message)).mkString(",")}"
       ).mkString(",")
-      if (errorMessage.isEmpty) {
-        messages("cannot.parse.json", messages("invalid.json"))
-      } else {
-        messages("cannot.parse.json", errorMessage)
-      }
-    case e: domain.errors.NotFoundSuchUser => messages("not.found.such.user", e.userApiId)
+      HttpErrorResponse(400, error.category, error.code, messages("cannot.parse.json", errorMessage))
+  }
+
+  def toHttpErrorResponse(error: errors.DomainError): HttpErrorResponse = error match {
+    case e: NotFoundSuchUser =>
+      HttpErrorResponse(404, error.category, error.code, messages("not.found.such.user", e.id))
+    case e: CannotCreateUserBecauseSameIdAlreadyExists =>
+      HttpErrorResponse(409, error.category, error.code, messages("cannot.create.user.because.same.id.already.exists", e.id))
+
   }
 }
 
@@ -36,29 +44,47 @@ class JsonModelWriteImplicitsFactory {
   def generateWrites(messages: Messages) = new JsonModelWriteImplicits(new ErrorMessageGenerator(messages))
 }
 
-class JsonModelWriteImplicits(messageGen: ErrorMessageGenerator) {
+class JsonModelWriteImplicits(val messageGen: ErrorMessageGenerator) {
 
-  private class ErrorWrites[T <: DomainError] extends Writes[T] {
-    override def writes(o: T): JsValue = Json.obj(
+  implicit val writesHttpErrorResponse: Writes[HttpErrorResponse] = new Writes[HttpErrorResponse] {
+    override def writes(o: HttpErrorResponse): JsValue = Json.obj(
       "category" -> o.category,
       "code" -> o.code,
-      "caption" -> messageGen.toMessage(o)
+      "caption" -> o.caption
     )
   }
 
-  implicit val writesNotFoundSuchUser: Writes[domain.errors.NotFoundSuchUser] = new ErrorWrites[domain.errors.NotFoundSuchUser]
+  implicit val writesUser: Writes[User] =
+    Json.writes[User]
 
-  implicit val writesJsonParseError: Writes[interface.JsonParseError] = new ErrorWrites[interface.JsonParseError]
+  implicit val writesGetUserResponse: Writes[GetUserResponse] =
+    Json.writes[GetUserResponse]
 
-  implicit val writesUser: Writes[domain.User] = Json.writes[domain.User]
+  implicit val writesGetUsersResponse: Writes[GetUsersResponse] =
+    Json.writes[GetUsersResponse]
 
-  implicit val writesGetUsersResponse: Writes[domain.responses.GetUsersResponse] = Json.writes[domain.responses.GetUsersResponse]
+  implicit val writesCreateUserResponse: Writes[CreateUserResponse] =
+    Json.writes[CreateUserResponse]
+
+  implicit val writesDeleteUserResponse: Writes[DeleteUserResponse] =
+    Json.writes[DeleteUserResponse]
 
 }
 
 class JsonModelReadImplicits {
-  implicit val readsGetUsersRequest: Reads[domain.requests.GetUsersRequest] = (
+
+  //case class User(id: String, name: String, age: Int)
+  implicit val readsUser: Reads[User] = (
+    (__ \ "id").read[String] ~
+      (__ \ "name").read[String] ~
+      (__ \ "age").read[Int]
+    ) (User.apply _)
+
+  implicit val readsCreateUserRequest: Reads[requests.CreateUserRequest] =
+    Json.reads[requests.CreateUserRequest]
+
+  implicit val readsGetUsersRequest: Reads[requests.GetUsersRequest] = (
     (__ \ "pageNum").read[Int].orElse(Reads.pure(0)) ~
       (__ \ "pageSize").read[Int].orElse(Reads.pure(0))
-    ) (domain.requests.GetUsersRequest.apply _)
+    ) (requests.GetUsersRequest.apply _)
 }

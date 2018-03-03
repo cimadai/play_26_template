@@ -3,6 +3,7 @@ package interface.presenter
 import com.google.inject.Inject
 import controllers.AssetsFinder
 import domain.TeamID
+import domain.requests.IndexPageRequest
 import play.api.i18n.I18nSupport
 import play.api.mvc.{InjectedController, RequestHeader, Result}
 
@@ -19,7 +20,7 @@ class InterfaceErrorPagePresenter @Inject()
 
   def present(err: interface.InterfaceError)(implicit request: RequestHeader): Result = {
     val messageGen = request2messageGen(request)
-    BadRequest(messageGen.toMessage(err))
+    BadRequest(messageGen.toHttpErrorResponse(err).caption)
   }
 
 }
@@ -33,12 +34,8 @@ class AppPageIndexPagePresenter @Inject()
   implicit val assetsFinder: AssetsFinder
 ) extends InjectedController with I18nSupport {
 
-  def present(teamId: TeamID, done: domain.responses.Done)(implicit request: RequestHeader): Result = {
+  def present(teamId: TeamID, req: IndexPageRequest)(implicit request: RequestHeader): Result = {
     Ok(framework.views.html.Application.index())
   }
-//
-//  def request2User(teamId: TeamID): Option[domain.User] = {
-//    Some(domain.User("aaa", "example", 30))
-//  }
 
 }

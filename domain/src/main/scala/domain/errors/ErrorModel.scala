@@ -3,8 +3,7 @@ package domain.errors
 import domain.responses.IDomainResponse
 
 // ドメイン内のレスポンスのうち、失敗を表すルートモデル
-abstract class DomainError(
-                            val status: Int,
+abstract sealed class DomainError(
                             val category: Int,
                             val code: Int) extends IDomainResponse {
   override def equals(other: Any): Boolean = other match {
@@ -29,5 +28,9 @@ object ErrorCategory {
   val UserApi = 2
 }
 
-case class NotFoundSuchUser(userApiId: String) extends DomainError(404, ErrorCategory.UserApi, 1)
+case class NotFoundSuchUser(id: String)
+  extends DomainError(ErrorCategory.UserApi, 1)
+
+case class CannotCreateUserBecauseSameIdAlreadyExists(id: String)
+  extends DomainError(ErrorCategory.UserApi, 2)
 

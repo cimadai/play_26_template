@@ -1,5 +1,6 @@
 title.application=アプリケーション
 cannot.parse.json=JSONのパースに失敗しました。({0})
+invalid.json=不正なJSONフォーマットです。
 not.found.such.user=指定されたユーザー ({0}) が見つかりませんでした。
-invalid.json=不正なJSONフォーマット
+cannot.create.user.because.same.id.already.exists= 指定されたユーザーID ({0}) はすでに登録済みです。
 

@@ -9,8 +9,13 @@ trait IDomainResponse extends IDomainModel
 trait IDomainSuccess extends IDomainResponse
 
 // ページレスポンス
-case class Done()
+case class Done() extends IDomainSuccess
+
+sealed trait IAPIResponse
 
 // APIレスポンス
-case class GetUsersResponse(users: Iterable[domain.User]) extends IDomainSuccess
+case class GetUserResponse(user: domain.User) extends IAPIResponse
+case class GetUsersResponse(users: Iterable[domain.User]) extends IAPIResponse
+case class CreateUserResponse(created: Int) extends IAPIResponse
+case class DeleteUserResponse(deleted: Int) extends IAPIResponse
 

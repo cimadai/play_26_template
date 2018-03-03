@@ -47,7 +47,8 @@ val PROJECT_SCALA_OPTIONS = Seq(
       "-Ywarn-dead-code",
       "-Ywarn-numeric-widen",
       "-Ywarn-value-discard",
-      "-Ywarn-unused"
+      "-Ywarn-unused",
+      "-Xfatal-warnings"
     )
 
 lazy val defaultSettings = Def.SettingsDefinition
@@ -74,7 +75,7 @@ lazy val web = project
     libraryDependencies ++= webLibraries,
     dist := (dist dependsOn webpack).value,
     stage := (stage dependsOn webpack).value,
-    playRunHooks += RunSubProcess(s"$webpackCommand --progress --colors --watch"),
+    playRunHooks += RunSubProcess(s"cd ${baseDirectory.value.getPath} && $webpackCommand --progress --colors --watch"),
     webpack := {
       if(runWebpack(baseDirectory.value) != 0) {
         throw new Exception("Something goes wrong when running webpack.")

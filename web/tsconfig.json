@@ -2,19 +2,21 @@
   "compilerOptions": {
     "target": "es5",
     "module": "commonjs",
-    "noImplicitAny": false,
     "removeComments": true,
     "preserveConstEnums": true,
-    "moduleResolution": "classic",
+    "moduleResolution": "node",
     "sourceMap": true,
     "outDir": ".typescript-out",
     "allowSyntheticDefaultImports": true,
-    "lib": [
-      "es2015",
-      "es2015.iterable",
-      "dom"
-    ],
-    "sourceRoot": "app/assets/js/"
+    "lib": [ "es2015", "es2015.iterable", "dom" ],
+    "sourceRoot": "app/assets/js/",
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+    "strictFunctionTypes": true,
+    "skipLibCheck": true,
+    "strict": true
   },
   "files": [
     "app/framework/assets/js/application.ts"

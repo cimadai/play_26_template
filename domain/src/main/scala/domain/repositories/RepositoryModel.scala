@@ -1,6 +1,7 @@
 package domain.repositories
 
 import domain.TeamID
+import domain.requests.{CreateUserRequest, DeleteUserRequest, GetUserRequest, GetUsersRequest}
 
 import scala.concurrent.Future
 
@@ -9,6 +10,9 @@ trait ITeamRepository {
 }
 
 trait IUserRepository {
-  def listUsers(pageNum: Int, pageSize: Int): Future[Iterable[domain.User]]
+  def getUser(request: GetUserRequest): Future[Option[domain.User]]
+  def listUsers(request: GetUsersRequest): Future[Iterable[domain.User]]
+  def createUser(request: CreateUserRequest): Future[Int]
+  def deleteUser(request: DeleteUserRequest): Future[Int]
 }
 

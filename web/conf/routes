@@ -3,9 +3,11 @@
 # ~~~~
 
 # Home page
-GET        /                    framework.controllers.AppPage.index
-GET        /api/users           framework.controllers.AppPage.getUsers
+GET           /                         framework.controllers.AppPage.index
+GET           /api/users                framework.controllers.AppPage.getUsers
+POST          /api/users                framework.controllers.AppPage.createUser
+DELETE        /api/users/:userId        framework.controllers.AppPage.deleteUser(userId: String)
 
 # Map static resources from the /public folder to the /framework/assets URL path
-GET        /assets/*file        controllers.Assets.versioned(path="/public", file)
+GET           /assets/*file             controllers.Assets.versioned(path="/public", file)
 

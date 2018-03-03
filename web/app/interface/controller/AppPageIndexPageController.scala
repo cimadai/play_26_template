@@ -1,55 +1,108 @@
 package interface.controller
 
 import com.google.inject.Inject
-import domain.requests.GetUsersRequest
+import domain._
+import domain.requests._
 import interface.presenter.JsonModelReadImplicits
-import play.api.libs.json.Reads
-import play.api.mvc.{InjectedController, Request}
+import play.api.libs.streams.Accumulator
+import play.api.mvc._
 
+import scala.concurrent.ExecutionContext
 
-//trait JsonParsable {
-//  /**
-//    * Request内に含まれるjson文字列をパースし、インスタンスを生成する。
-//    *
-//    * @param request HTTP Request
-//    */
-//  protected def parseAs[T](request: interface.Types.OutsideHttpRequest)
-//                          (implicit reads: Reads[T])
-//  : Either[interface.JsonParseError, T] = {
-//
-//    request.body.asJson match {
-//      case Some(jsValue) => jsValue.validate[T].fold(err => {
-//        Left(interface.JsonParseError(err.toMap))
-//      }, obj => Right(obj))
-//      case _ => Left(interface.JsonParseError(Map.empty))
-//    }
-//
-//  }
-//}
+trait TeamIdParsable {
 
-class AppPageIndexPageController() extends IHttpController {
+  protected def parseTeamID(domain: String): TeamID = {
+    if (domain.contains(".")) {
+      TeamID(domain.substring(0, domain.indexOf(".")))
+    } else {
+      TeamID("postgres")
+    }
+  }
 
-  def parse()
-           (implicit request: Request[_])
-  : Either[interface.InterfaceError, domain.requests.IndexPageRequest] = {
+  protected val teamIdParser: BodyParser[TeamID] = BodyParser("teamIdParser") { request =>
+    Accumulator.done(Right(parseTeamID(request.domain)))
+  }
+}
 
-    Right(domain.requests.IndexPageRequest())
+class AppPageIndexPageController @Inject()
+(
+  implicit val ec: ExecutionContext
+) extends TeamIdParsable {
 
+  def parse: BodyParser[(TeamID, IndexPageRequest)] = {
+    teamIdParser.map(teamId => {
+      (teamId, IndexPageRequest())
+    })
   }
 
 }
 
-class AppPageGetUsersController @Inject()
+class GetUserController @Inject()
 (
+  implicit val ec: ExecutionContext
+) extends TeamIdParsable {
+
+  def parse(userId: String)(implicit parser: PlayBodyParsers): BodyParser[(TeamID, GetUserRequest)] = {
+    teamIdParser.map(teamId => {
+      (teamId, GetUserRequest(userId))
+    })
+  }
+}
+
+class GetUsersController @Inject()
+(
+  implicit val ec: ExecutionContext
+) extends TeamIdParsable {
+
+  def parse(implicit parser: PlayBodyParsers): BodyParser[(TeamID, GetUsersRequest)] = {
+    parser.using { request =>
+      val pageNum = math.max(1, request.getQueryString("pageNum").map(_.toInt).getOrElse(1))
+      val pageSize = request.getQueryString("pageSize").map(_.toInt).getOrElse(10)
+
+      teamIdParser.map(teamId => {
+        (teamId, GetUsersRequest(pageNum, pageSize))
+      })
+    }
+  }
+}
+
+class CreateUserController @Inject()
+(
+  implicit val ec: ExecutionContext,
   val readImplicits: JsonModelReadImplicits
-) extends InjectedController {
+) extends TeamIdParsable {
 
-  def parse()(implicit request: Request[_])
-  : Either[interface.InterfaceError, domain.requests.GetUsersRequest] = {
+  import readImplicits._
 
-    val pageNum = math.max(1, request.getQueryString("pageNum").map(_.toInt).getOrElse(1))
-    val pageSize = request.getQueryString("pageSize").map(_.toInt).getOrElse(10)
+  def parse(implicit parser: PlayBodyParsers): BodyParser[(TeamID, CreateUserRequest)] = {
+    parser.using { request =>
+      parser.json[CreateUserRequest].map { req =>
+        (parseTeamID(request.domain), req)
+      }
+    }
+  }
+}
 
-    Right(GetUsersRequest(pageNum, pageSize))
+class DeleteUserController @Inject()
+(
+  implicit val ec: ExecutionContext
+) extends TeamIdParsable {
+
+  def parse(userId: String)(implicit parser: PlayBodyParsers): BodyParser[(TeamID, DeleteUserRequest)] = {
+    teamIdParser.map(teamId => {
+      (teamId, DeleteUserRequest(userId))
+    })
+  }
+}
+
+class GetAndDeleteUserController @Inject()
+(
+  implicit val ec: ExecutionContext
+) extends TeamIdParsable {
+
+  def parse(userId: String)(implicit parser: PlayBodyParsers): BodyParser[(TeamID, GetUserRequest, DeleteUserRequest)] = {
+    teamIdParser.map(teamId => {
+      (teamId, GetUserRequest(userId), DeleteUserRequest(userId))
+    })
   }
 }
