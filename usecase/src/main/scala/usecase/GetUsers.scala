@@ -13,11 +13,11 @@ class GetUsers @Inject()
   teamRepository: ITeamRepository
 ) {
 
-  def getUsers(teamId: TeamID, req: GetUsersRequest)
+  def getUsers(req: GetUsersRequest)
   : Future[domain.responses.GetUsersResponse] = {
 
     teamRepository
-      .getUserRepository(teamId)
+      .getUserRepository(req.teamId)
       .listUsers(req)
       .map(domain.responses.GetUsersResponse)
 

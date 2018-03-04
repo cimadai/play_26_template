@@ -34,7 +34,7 @@ class AppPageIndexPagePresenter @Inject()
   implicit val assetsFinder: AssetsFinder
 ) extends InjectedController with I18nSupport {
 
-  def present(teamId: TeamID, req: IndexPageRequest)(implicit request: RequestHeader): Result = {
+  def present(req: IndexPageRequest)(implicit request: RequestHeader): Result = {
     Ok(framework.views.html.Application.index())
   }
 

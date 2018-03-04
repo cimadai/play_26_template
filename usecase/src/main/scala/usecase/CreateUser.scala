@@ -15,13 +15,13 @@ class CreateUser @Inject()
   teamRepository: ITeamRepository
 ) {
 
-  def createUser(teamId: TeamID, req: CreateUserRequest)
+  def createUser(req: CreateUserRequest)
   : Future[Either[CannotCreateUserBecauseSameIdAlreadyExists, CreateUserResponse]] = {
 
-    val userRepo = teamRepository.getUserRepository(teamId)
+    val userRepo = teamRepository.getUserRepository(req.teamId)
 
     userRepo
-      .getUser(GetUserRequest(req.user.id))
+      .getUser(GetUserRequest(req.teamId, req.user.id))
       .flatMap {
         case Some(_) =>
           Future.successful(

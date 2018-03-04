@@ -6,14 +6,15 @@ import play.api.mvc._
 
 import scala.concurrent.ExecutionContext
 
-class AppPageIndexPageController @Inject()
+class DeleteUserController @Inject()
 (
   implicit val ec: ExecutionContext
 ) extends BodyParserBase {
 
-  def parse: BodyParser[IndexPageRequest] =
+  def parse(userId: String)(implicit parser: PlayBodyParsers): BodyParser[DeleteUserRequest] =
     httpRequestParser.map { request =>
-      IndexPageRequest(parseTeamID(request.domain))
+      DeleteUserRequest(parseTeamID(request.domain), userId)
     }
-
 }
+
+

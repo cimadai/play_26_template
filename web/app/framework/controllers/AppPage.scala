@@ -2,7 +2,6 @@ package framework.controllers
 
 import javax.inject.Inject
 
-import domain.TeamID
 import domain.requests._
 import interface.controller._
 import interface.presenter.{AppPageIndexPagePresenter, InterfaceErrorPagePresenter, JsonPresenter}
@@ -23,20 +22,20 @@ class AppPage @Inject()
   getUserController: GetUserController,
   getUsersController: GetUsersController,
   createUserController: CreateUserController,
-  deleteUserController: GetAndDeleteUserController,
+  deleteUserController: DeleteUserController,
   errorPagePresenter: InterfaceErrorPagePresenter,
   jsonPresenter: JsonPresenter,
   implicit val ec: ExecutionContext
 ) extends InjectedController with LangImplicits {
   implicit def parser: PlayBodyParsers = parse
 
-  def index: Action[(TeamID, IndexPageRequest)] = Action(indexPageController.parse).async { implicit request =>
-    Future.successful(indexPagePresenter.present(request.body._1, request.body._2))
+  def index: Action[IndexPageRequest] = Action(indexPageController.parse).async { implicit request =>
+    Future.successful(indexPagePresenter.present(request.body))
   }
 
-  def createUser: Action[(TeamID, CreateUserRequest)] = Action(createUserController.parse).async { implicit request =>
+  def createUser: Action[CreateUserRequest] = Action(createUserController.parse).async { implicit request =>
     createUserUseCase
-      .createUser(request.body._1, request.body._2)
+      .createUser(request.body)
       .map(_.fold(
         error =>
           jsonPresenter.present(error),
@@ -45,9 +44,9 @@ class AppPage @Inject()
       ))
   }
 
-  def getUser(userId: String): Action[(TeamID, GetUserRequest)] = Action(getUserController.parse(userId)).async { implicit request =>
+  def getUser(userId: String): Action[GetUserRequest] = Action(getUserController.parse(userId)).async { implicit request =>
     getUserUseCase
-      .getUser(request.body._1, request.body._2)
+      .getUser(request.body)
       .map(_.fold(
         notFound =>
           jsonPresenter.present(notFound),
@@ -56,21 +55,22 @@ class AppPage @Inject()
       ))
   }
 
-  def getUsers: Action[(TeamID, GetUsersRequest)] = Action(getUsersController.parse).async { implicit request =>
+  def getUsers: Action[GetUsersRequest] = Action(getUsersController.parse).async { implicit request =>
       getUsersUseCase
-        .getUsers(request.body._1, request.body._2)
+        .getUsers(request.body)
         .map(jsonPresenter.present)
   }
 
-  def deleteUser(userId: String): Action[(TeamID, GetUserRequest, DeleteUserRequest)] = Action(deleteUserController.parse(userId)).async { implicit request =>
+  def deleteUser(userId: String): Action[DeleteUserRequest] = Action(deleteUserController.parse(userId)).async { implicit request =>
+    val getUserRequest = GetUserRequest(request.body.teamId, request.body.id)
     getUserUseCase
-      .getUser(request.body._1, request.body._2)
+      .getUser(getUserRequest)
       .flatMap(_.fold(
         notFound =>
           Future.successful(jsonPresenter.present(notFound)),
         _ =>
           deleteUserUseCase
-            .deleteUser(request.body._1, request.body._3)
+            .deleteUser(request.body)
             .map(jsonPresenter.present)
       ))
   }

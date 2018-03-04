@@ -80,11 +80,4 @@ class JsonModelReadImplicits {
       (__ \ "age").read[Int]
     ) (User.apply _)
 
-  implicit val readsCreateUserRequest: Reads[requests.CreateUserRequest] =
-    Json.reads[requests.CreateUserRequest]
-
-  implicit val readsGetUsersRequest: Reads[requests.GetUsersRequest] = (
-    (__ \ "pageNum").read[Int].orElse(Reads.pure(0)) ~
-      (__ \ "pageSize").read[Int].orElse(Reads.pure(0))
-    ) (requests.GetUsersRequest.apply _)
 }

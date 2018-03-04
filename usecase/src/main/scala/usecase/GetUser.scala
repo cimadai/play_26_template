@@ -15,11 +15,11 @@ class GetUser @Inject()
   teamRepository: ITeamRepository
 ) {
 
-  def getUser(teamId: TeamID, req: GetUserRequest)
+  def getUser(req: GetUserRequest)
   : Future[Either[NotFoundSuchUser, GetUserResponse]] = {
 
     teamRepository
-      .getUserRepository(teamId)
+      .getUserRepository(req.teamId)
       .getUser(req)
       .map {
         case Some(user) => Right(GetUserResponse(user))

@@ -13,11 +13,11 @@ class DeleteUser @Inject()
   teamRepository: ITeamRepository
 ) {
 
-  def deleteUser(teamId: TeamID, req: DeleteUserRequest)
+  def deleteUser(req: DeleteUserRequest)
   : Future[domain.responses.DeleteUserResponse] = {
 
     teamRepository
-      .getUserRepository(teamId)
+      .getUserRepository(req.teamId)
       .deleteUser(req)
       .map(domain.responses.DeleteUserResponse)
 
