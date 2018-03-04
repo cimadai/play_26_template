@@ -33,91 +33,65 @@
 
 <script lang="ts" type="text/tsx">
     import Vue from "vue";
+    import {User} from "../models";
+    import Component from "vue-class-component";
 
-    import {IApiError, ICreateUserResponse, IDeleteUserResponse, IGetUsersResponse} from "../models";
+    @Component
+    export default class TopPageComponent extends Vue {
+        greeting: string = "Example app";
+        userName: string = "";
+        users: User[] = [];
 
-    import AxiosFactory from 'axios';
-    const axios = AxiosFactory.create({headers: {"X-Requested-With": "XMLHttpRequest"}});
-
-    export default Vue.extend({
-        data: () => {
-            return {
-                greeting: "Example app",
-                userName: "",
-                users: []
-            }
-        },
-        mounted: function () {
+        // lifecycle hook
+        mounted () {
             this.getUsers();
-        },
-        methods: {
-            addUser: function() {
-                if (!this.userName || this.userName.length == 0) {
-                    this.error({
-                        title: "Error",
-                        text: "userId must be set."
-                    });
-                    return;
-                }
-
-                axios
-                    .post("/api/users", {
-                        user: {
-                            id: this.userName,
-                            name: this.userName,
-                            age: 100,
-                        }
-                    })
-                    .then(response => response.data as ICreateUserResponse)
-                    .then(() => {
-                        this.getUsers();
-                    })
-                    .catch(e => {
-                        const apiError = e.response.data as IApiError;
-                        this.error({
-                            title: "title1",
-                            text: apiError.caption
-                        });
-                    })
-            },
-            getUsers: function() {
-                axios
-                    .get("/api/users")
-                    .then(response => response.data as IGetUsersResponse)
-                    .then(data => {
-                        this.users = data.users;
-                    })
-                    .catch(e => {
-                        const apiError = e.response.data as IApiError;
-                        this.error({
-                            title: "title2",
-                            text: apiError.caption
-                        });
-                    });
-            },
-            deleteUser: function(userId: string) {
-                if (!userId || userId.length == 0) {
-                    this.error({
-                        title: "Error",
-                        text: "userId must be set."
-                    });
-                    return;
-                }
-
-                axios
-                    .delete(`/api/users/${userId}`)
-                    .then(response => response.data as IDeleteUserResponse)
-                    .then(() => {
-                        this.getUsers();
-                    })
-                    .catch(e => {
-                        const apiError = e.response.data as IApiError;
-                        this.error({
-                            title: "title3",
-                            text: apiError.caption
-                        });
-                    });
-            }
         }
-    })
+
+        // methods
+        addUser () {
+            if (!this.userName || this.userName.length == 0) {
+                this.error({
+                    title: "Error",
+                    text: "userId must be set."
+                });
+                return;
+            }
+
+            this.API.User.create(new User(this.userName, this.userName, 100))
+                .then(data => {
+                    this.getUsers();
+                })
+                .catch(error => {
+                    this.error({title: "title1", text: error.caption});
+                });
+        }
+
+        getUsers () {
+            this.API.User.list()
+                .then(data => {
+                    this.users = data.users;
+                })
+                .catch(error => {
+                    this.error({title: "title2", text: error.caption});
+                });
+        }
+
+        deleteUser (userId: string) {
+            if (!userId || userId.length == 0) {
+                this.error({
+                    title: "Error",
+                    text: "userId must be set."
+                });
+                return;
+            }
+
+            this.API.User.remove(userId)
+                .then(data => {
+                    this.getUsers();
+                })
+                .catch(error => {
+                    this.error({title: "title3", text: error.caption});
+                });
+        }
+    }
 </script>

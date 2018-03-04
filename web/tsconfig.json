@@ -18,7 +18,8 @@
     "strictNullChecks": false,
     "strictFunctionTypes": true,
     "skipLibCheck": true,
-    "strict": true
+    "strict": true,
+    "experimentalDecorators": true
   },
   "files": [
     "app/framework/assets/js/application.ts"
