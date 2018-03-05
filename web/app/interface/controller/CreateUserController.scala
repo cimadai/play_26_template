@@ -5,6 +5,7 @@ import domain._
 import domain.requests._
 import interface.JsonParseError
 import interface.presenter.{InterfaceErrorJsonPresenter, JsonModelReadImplicits}
+import play.api.Configuration
 import play.api.mvc._
 
 import scala.concurrent.ExecutionContext
@@ -12,6 +13,7 @@ import scala.concurrent.ExecutionContext
 class CreateUserController @Inject()
 (
   implicit val ec: ExecutionContext,
+  implicit val config: Configuration,
   val readImplicits: JsonModelReadImplicits,
   jsonErrorPresenter: InterfaceErrorJsonPresenter
 ) extends BodyParserBase{

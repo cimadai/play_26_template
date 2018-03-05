@@ -2,7 +2,6 @@ package interface.presenter
 
 import com.google.inject.Inject
 import controllers.AssetsFinder
-import domain.TeamID
 import domain.requests.IndexPageRequest
 import play.api.i18n.I18nSupport
 import play.api.mvc.{InjectedController, RequestHeader, Result}

@@ -2,13 +2,15 @@ package interface.controller
 
 import com.google.inject.Inject
 import domain.requests.GetUsersRequest
+import play.api.Configuration
 import play.api.mvc.{BodyParser, PlayBodyParsers}
 
 import scala.concurrent.ExecutionContext
 
 class GetUsersController @Inject()
 (
-  implicit val ec: ExecutionContext
+  implicit val ec: ExecutionContext,
+  implicit val config: Configuration
 ) extends BodyParserBase {
 
   def parse(implicit parser: PlayBodyParsers): BodyParser[GetUsersRequest] =
